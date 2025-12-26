@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -11,10 +11,20 @@ repos:
         exclude: ^\.clang-(format|tidy)$
       - id: check-added-large-files
 
+  # Config file: .codespellrc
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        files: ^.*\.(cmake|cpp|hpp|txt|md|json|in|yaml|yml|py|toml)$
+        args: ["--write", "--ignore-words", ".codespellignore" ]
+
+  # Clang-format for C++
   # This brings in a portable version of clang-format.
   # See also: https://github.com/ssciwr/clang-format-wheel
+  # Config file: .clang-format
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.7
+    rev: v21.1.7
     hooks:
       - id: clang-format
         types_or: [c++, c, json]
@@ -22,21 +32,31 @@ repos:
 
   # CMake linting and formatting
   - repo: https://github.com/BlankSpruce/gersemi
-    rev: 0.20.1
+    rev: 0.23.2
     hooks:
       - id: gersemi
         name: CMake linting
 
-  # TODO: Markdown linting
+  # Markdown linting
   # Config file: .markdownlint.yaml
+  # Commented out to disable this by default. Uncomment to enable markdown linting.
   # - repo: https://github.com/igorshubovych/markdownlint-cli
-  #   rev: v0.43.0
+  #   rev: v0.46.0
   #   hooks:
   #     - id: markdownlint
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+  # Config file: pyproject.toml
+  # first Python sort imports
+  - repo: https://github.com/pycqa/isort
+    rev: 7.0.0
     hooks:
-      - id: codespell
-        files: ^.*\.(cmake|cpp|hpp|txt|md|json|in|yaml|yml)$
-        args: ["-w", "--ignore-words", ".codespellignore" ]
+      - id: isort
+
+  # Config file: pyproject.toml
+  # second Python code formatting
+  - repo: https://github.com/psf/black
+    rev: 25.11.0
+    hooks:
+      - id: black
+
+exclude: 'infra/'
