@@ -4,11 +4,19 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_ATOMIC_INTRUSIVE_STACK
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_ATOMIC_INTRUSIVE_STACK
 
-#include <beman/execution/detail/intrusive_stack.hpp>
-
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <atomic>
 #include <cassert>
 #include <optional>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.intrusive_stack;
+#else
+#include <beman/execution/detail/intrusive_stack.hpp>
+#endif
 
 namespace beman::execution::detail {
 
@@ -85,4 +93,4 @@ class atomic_intrusive_stack<Next> {
 
 } // namespace beman::execution::detail
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_ATOMIC_INTRUSIVE_STACK

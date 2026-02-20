@@ -39,13 +39,18 @@ build
 .vs
 .cache
 .vscode
+.idea
 compile_commands.json
 stagedir
 
 # In-source builds are not allowed
 CMakeCache.txt
 CMakeFiles/
+GNUmakefile
 
 *.log
 docs/html
 docs/latex
+docs/code/*.cpp
+docs/tutorial.md
+gcm.cache

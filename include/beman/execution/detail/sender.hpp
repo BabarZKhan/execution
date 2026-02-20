@@ -4,13 +4,26 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER
 
-#include <beman/execution/detail/empty_env.hpp>
-#include <beman/execution/detail/get_env.hpp>
-#include <beman/execution/detail/queryable.hpp>
-#include <beman/execution/detail/is_awaitable.hpp>
-#include <beman/execution/detail/env_promise.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
 #include <type_traits>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.env;
+import beman.execution.detail.env_promise;
+import beman.execution.detail.get_env;
+import beman.execution.detail.is_awaitable;
+import beman.execution.detail.queryable;
+#else
+#include <beman/execution/detail/env.hpp>
+#include <beman/execution/detail/env_promise.hpp>
+#include <beman/execution/detail/get_env.hpp>
+#include <beman/execution/detail/is_awaitable.hpp>
+#include <beman/execution/detail/queryable.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -25,7 +38,7 @@ template <typename Sender>
 concept enable_sender =
     ::beman::execution::detail::is_sender<Sender> ||
     ::beman::execution::detail::is_awaitable<Sender,
-                                             ::beman::execution::detail::env_promise<::beman::execution::empty_env>>;
+                                             ::beman::execution::detail::env_promise<::beman::execution::env<>>>;
 } // namespace beman::execution::detail
 namespace beman::execution {
 template <typename Sender>
@@ -38,4 +51,4 @@ concept sender = ::beman::execution::detail::enable_sender<::std::remove_cvref_t
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER

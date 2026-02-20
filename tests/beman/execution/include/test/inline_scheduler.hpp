@@ -1,11 +1,13 @@
 // tests/beman/execution/include/test/inline_scheduler.hpp            -*-C++-*-
-// ----------------------------------------------------------------------------
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-// ----------------------------------------------------------------------------
 
 #ifndef INCLUDED_TESTS_BEMAN_EXECUTION_INCLUDE_TEST_INLINE_SCHEDULER
 #define INCLUDED_TESTS_BEMAN_EXECUTION_INCLUDE_TEST_INLINE_SCHEDULER
 
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/get_completion_scheduler.hpp>
 #include <beman/execution/detail/get_env.hpp>
 #include <beman/execution/detail/sender.hpp>
@@ -14,7 +16,7 @@
 #include <beman/execution/detail/operation_state.hpp>
 #include <beman/execution/detail/scheduler.hpp>
 #include <beman/execution/detail/completion_signatures.hpp>
-#include <test/execution.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 

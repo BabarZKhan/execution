@@ -1,14 +1,19 @@
 // src/beman/execution/tests/exec-bulk.test.cpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "beman/execution/detail/get_completion_signatures.hpp"
-#include "beman/execution/detail/get_env.hpp"
-#include "beman/execution/detail/sync_wait.hpp"
 #include <cstdlib>
+#include <tuple>
+#include <vector>
 #include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/bulk.hpp>
 #include <beman/execution/detail/just.hpp>
-#include <vector>
+#include <beman/execution/detail/get_completion_signatures.hpp>
+#include <beman/execution/detail/get_env.hpp>
+#include <beman/execution/detail/sync_wait.hpp>
+#endif
 
 namespace {
 auto test_bulk() {
@@ -20,7 +25,7 @@ auto test_bulk() {
     static_assert(
         std::is_same_v<decltype(b0_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
 
     int counter = 0;
@@ -33,7 +38,7 @@ auto test_bulk() {
     static_assert(
         std::is_same_v<decltype(b1_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
     test_std::sync_wait(b1);
     ASSERT(counter == 10);
@@ -52,14 +57,14 @@ auto test_bulk() {
     static_assert(
         std::is_same_v<decltype(b2_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(std::vector<int>),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
     test_std::sync_wait(b2);
 
     // Expected results: element-wise multiplication of a and b
     std::vector<int> expected{9, 20, 33, 52, 70, 90, 112, 136};
 
-    for (size_t i = 0; i < results.size(); ++i) {
+    for (::std::size_t i = 0; i < results.size(); ++i) {
         ASSERT(results[i] == expected[i]);
     }
 }
@@ -69,7 +74,7 @@ auto test_bulk_noexept() {
     auto b0_env         = test_std::get_env(b0);
     auto b0_completions = test_std::get_completion_signatures(b0, b0_env);
     static_assert(std::is_same_v<decltype(b0_completions),
-                                 beman::execution::completion_signatures<beman::execution::set_value_t()> >,
+                                 beman::execution::completion_signatures<beman::execution::set_value_t()>>,
                   "Completion signatures do not match!");
     static_assert(test_std::sender<decltype(b0)>);
 
@@ -81,7 +86,7 @@ auto test_bulk_noexept() {
     auto b1_env         = test_std::get_env(b0);
     auto b1_completions = test_std::get_completion_signatures(b1, b1_env);
     static_assert(std::is_same_v<decltype(b1_completions),
-                                 beman::execution::completion_signatures<beman::execution::set_value_t()> >,
+                                 beman::execution::completion_signatures<beman::execution::set_value_t()>>,
                   "Completion signatures do not match!");
     test_std::sync_wait(b1);
     ASSERT(counter == 10);
@@ -96,7 +101,7 @@ auto test_bulk_pipeable() {
     static_assert(
         std::is_same_v<decltype(b0_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
 
     int counter = 0;
@@ -109,7 +114,7 @@ auto test_bulk_pipeable() {
     static_assert(
         std::is_same_v<decltype(b1_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
     test_std::sync_wait(b1);
     ASSERT(counter == 10);
@@ -129,14 +134,14 @@ auto test_bulk_pipeable() {
     static_assert(
         std::is_same_v<decltype(b2_completions),
                        beman::execution::completion_signatures<beman::execution::set_value_t(std::vector<int>),
-                                                               beman::execution::set_error_t(std::exception_ptr)> >,
+                                                               beman::execution::set_error_t(std::exception_ptr)>>,
         "Completion signatures do not match!");
     test_std::sync_wait(b2);
 
     // Expected results: element-wise multiplication of a and b
     std::vector<int> expected{9, 20, 33, 52, 70, 90, 112, 136};
 
-    for (size_t i = 0; i < results.size(); ++i) {
+    for (::std::size_t i = 0; i < results.size(); ++i) {
         ASSERT(results[i] == expected[i]);
     }
 }
@@ -149,6 +154,7 @@ TEST(exec_bulk) {
 
         test_bulk();
         test_bulk_noexept();
+        test_bulk_pipeable();
 
     } catch (...) {
 

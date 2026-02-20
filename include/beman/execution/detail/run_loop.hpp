@@ -4,6 +4,31 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_RUN_LOOP
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_RUN_LOOP
 
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
+#include <condition_variable>
+#include <exception>
+#include <mutex>
+#include <type_traits>
+#include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.completion_signatures;
+import beman.execution.detail.env;
+import beman.execution.detail.get_completion_scheduler;
+import beman.execution.detail.get_env;
+import beman.execution.detail.get_stop_token;
+import beman.execution.detail.immovable;
+import beman.execution.detail.operation_state;
+import beman.execution.detail.scheduler;
+import beman.execution.detail.scheduler_t;
+import beman.execution.detail.sender;
+import beman.execution.detail.set_stopped;
+import beman.execution.detail.set_value;
+import beman.execution.detail.unstoppable_token;
+#else
 #include <beman/execution/detail/completion_signatures.hpp>
 #include <beman/execution/detail/get_completion_scheduler.hpp>
 #include <beman/execution/detail/get_env.hpp>
@@ -12,15 +37,10 @@
 #include <beman/execution/detail/operation_state.hpp>
 #include <beman/execution/detail/scheduler.hpp>
 #include <beman/execution/detail/sender.hpp>
-#include <beman/execution/detail/set_error.hpp>
 #include <beman/execution/detail/set_stopped.hpp>
 #include <beman/execution/detail/set_value.hpp>
-
-#include <exception>
-#include <condition_variable>
-#include <mutex>
-#include <type_traits>
-#include <utility>
+#include <beman/execution/detail/unstoppable_token.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -53,27 +73,29 @@ class run_loop {
         // NOLINTBEGIN(misc-no-recursion)
         template <typename R>
         opstate(run_loop* l, R&& rcvr) : loop(l), receiver(::std::forward<Receiver>(rcvr)) {}
-        auto start() & noexcept -> void {
-            try {
-                this->loop->push_back(this);
-            } catch (...) {
-                ::beman::execution::set_error(::std::move(this->receiver), ::std::current_exception());
-            }
-        }
+        auto start() & noexcept -> void { this->loop->push_back(this); }
         // NOLINTEND(misc-no-recursion)
         auto execute() noexcept -> void override {
-            if (::beman::execution::get_stop_token(::beman::execution::get_env(this->receiver)).stop_requested())
-                ::beman::execution::set_stopped(::std::move(this->receiver));
-            else
+            using token = decltype(::beman::execution::get_stop_token(::beman::execution::get_env(this->receiver)));
+            if constexpr (not ::beman::execution::unstoppable_token<token>) {
+                if (::beman::execution::get_stop_token(::beman::execution::get_env(this->receiver)).stop_requested())
+                    ::beman::execution::set_stopped(::std::move(this->receiver));
+                else
+                    ::beman::execution::set_value(::std::move(this->receiver));
+            } else
                 ::beman::execution::set_value(::std::move(this->receiver));
         }
     };
     struct sender {
         using sender_concept = ::beman::execution::sender_t;
-        using completion_signatures =
-            ::beman::execution::completion_signatures<::beman::execution::set_value_t(),
-                                                      ::beman::execution::set_error_t(::std::exception_ptr),
-                                                      ::beman::execution::set_stopped_t()>;
+        template <typename Env = ::beman::execution::env<>>
+        auto get_completion_signatures(Env&& env) const noexcept {
+            if constexpr (::beman::execution::unstoppable_token<decltype(::beman::execution::get_stop_token(env))>)
+                return ::beman::execution::completion_signatures<::beman::execution::set_value_t()>{};
+            else
+                return ::beman::execution::completion_signatures<::beman::execution::set_value_t(),
+                                                                 ::beman::execution::set_stopped_t()>{};
+        }
 
         run_loop* loop;
 
@@ -100,7 +122,8 @@ class run_loop {
     opstate_base*             front{};
     opstate_base*             back{};
 
-    auto push_back(opstate_base* item) -> void {
+    auto push_back(opstate_base* item) noexcept -> void {
+        //-dk:TODO run_loop::push_back should really be lock-free
         ::std::lock_guard guard(this->mutex);
         if (auto previous_back{::std::exchange(this->back, item)}) {
             previous_back->next = item;
@@ -109,7 +132,8 @@ class run_loop {
             this->condition.notify_one();
         }
     }
-    auto pop_front() -> opstate_base* {
+    auto pop_front() noexcept -> opstate_base* {
+        //-dk:TODO run_loop::pop_front should really be lock-free
         ::std::unique_lock guard(this->mutex);
         this->condition.wait(guard, [this] { return this->front || this->current_state == state::finishing; });
         if (this->front == this->back)
@@ -154,4 +178,4 @@ class run_loop {
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_RUN_LOOP

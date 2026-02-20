@@ -4,8 +4,13 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_INTRUSIVE_QUEUE
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_INTRUSIVE_QUEUE
 
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <cassert>
 #include <utility>
+#endif
 
 namespace beman::execution::detail {
 
@@ -44,4 +49,4 @@ class intrusive_stack<Next> {
 
 } // namespace beman::execution::detail
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_INTRUSIVE_QUEUE

@@ -5,10 +5,17 @@
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_GET_DOMAIN
 
 #include <beman/execution/detail/common.hpp>
-#include <beman/execution/detail/forwarding_query.hpp>
-#include <utility>
-
 #include <beman/execution/detail/suppress_push.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
+#include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.forwarding_query;
+#else
+#include <beman/execution/detail/forwarding_query.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -44,4 +51,4 @@ inline constexpr get_domain_t get_domain{};
 
 #include <beman/execution/detail/suppress_pop.hpp>
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_GET_DOMAIN

@@ -4,9 +4,14 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_DECOMPOSE
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_DECOMPOSE
 
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -39,9 +44,9 @@ sender_data(Tag&&, Data&, Children&&) -> sender_data<Tag, Data, Children>;
 template <typename Sender>
 auto get_sender_data(Sender&& sender) {
 #if 0
-        //-dk:TODO should use a dynamic/language approach:
-        auto&& [tag, data, ... children] = sender;
-        return sender_meta<decltype(tag), decltype(data), ::std::tuple<decltype(children)...>>;
+          //-dk:TODO should use a dynamic/language approach:
+          auto&& [tag, data, ... children] = sender;
+          return sender_meta<decltype(tag), decltype(data), ::std::tuple<decltype(children)...>>;
 #else
     using sender_type = ::std::remove_cvref_t<Sender>;
     static constexpr ::beman::execution::detail::sender_convert_to_any_t at{};
@@ -84,4 +89,4 @@ auto get_sender_meta(Sender&& sender) {
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_DECOMPOSE

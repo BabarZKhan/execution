@@ -1,10 +1,14 @@
 // src/beman/execution/tests/exec-starts-on.test.cpp                -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/starts_on.hpp>
 #include <beman/execution/execution.hpp>
-#include <test/execution.hpp>
-#include <concepts>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -66,7 +70,7 @@ auto test_use(Scheduler&& scheduler, Sender&& sender) -> void {
     auto s{test_std::starts_on(::std::forward<Scheduler>(scheduler), ::std::forward<Sender>(sender))};
     test::use(s);
     // test::check_type<void>(s);
-    // test::check_type<void>(test_std::get_completion_signatures(s, test_std::empty_env{}));
+    // test::check_type<void>(test_std::get_completion_signatures(s, test_std::test_std::env<>{}));
     test_std::sync_wait(std::move(s));
 }
 } // namespace

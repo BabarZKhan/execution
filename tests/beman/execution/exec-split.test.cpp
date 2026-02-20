@@ -1,13 +1,22 @@
 // src/beman/execution/tests/split.test.cpp                         -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <beman/execution/detail/split.hpp>
-#include <beman/execution/execution.hpp>
-#include <test/execution.hpp>
 #include <concepts>
 #include <chrono>
 #include <future>
 #include <list>
+#include <thread>
+#include <variant>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+import beman.execution.detail;
+#else
+#include <beman/execution/detail/meta_combine.hpp>
+#include <beman/execution/detail/split.hpp>
+#include <beman/execution/detail/type_list.hpp>
+#include <beman/execution/execution.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -118,13 +127,11 @@ struct NonCopyable {
     NonCopyable& operator=(const NonCopyable&)     = delete;
 };
 
-struct empty_env {};
-
 void test_destroy_unused_split() {
     auto just               = beman::execution::just(NonCopyable{});
     auto split              = beman::execution::split(std::move(just));
     using split_sender_type = decltype(split);
-    static_assert(beman::execution::sender_in<split_sender_type, empty_env>);
+    static_assert(beman::execution::sender_in<split_sender_type, test_std::env<>>);
 }
 
 void test_destroy_two_unused_split() {
@@ -132,11 +139,11 @@ void test_destroy_two_unused_split() {
     auto split              = beman::execution::split(std::move(just));
     auto copy               = split;
     using split_sender_type = decltype(copy);
-    static_assert(beman::execution::sender_in<split_sender_type, empty_env>);
+    static_assert(beman::execution::sender_in<split_sender_type, test_std::env<>>);
 }
 
-using beman::execution::detail::type_list;
-using beman::execution::detail::meta::combine;
+using test_detail::type_list;
+using test_detail::meta::combine;
 
 template <class... Args>
 using to_set_value_t = type_list<beman::execution::set_value_t(Args...)>;
@@ -146,7 +153,8 @@ void test_completion_sigs_and_sync_wait_on_split() {
     auto split                       = beman::execution::split(std::move(just));
     using split_sender               = std::decay_t<decltype(split)>;
     using expected_value_completions = type_list<beman::execution::set_value_t(const NonCopyable&)>;
-    using value_completions = beman::execution::value_types_of_t<split_sender, empty_env, to_set_value_t, combine>;
+    using value_completions =
+        beman::execution::value_types_of_t<split_sender, test_std::env<>, to_set_value_t, combine>;
     static_assert(std::same_as<value_completions, expected_value_completions>);
 
     auto eat_completion = beman::execution::then(split, [&](const NonCopyable&) {});

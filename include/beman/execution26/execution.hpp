@@ -1,8 +1,8 @@
 // include/beman/execution26/execution.hpp                            -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#ifndef INCLUDED_INCLUDE_BEMAN_EXECUTION26_EXECUTION
-#define INCLUDED_INCLUDE_BEMAN_EXECUTION26_EXECUTION
+#ifndef INCLUDED_BEMAN_EXECUTION26_EXECUTION
+#define INCLUDED_BEMAN_EXECUTION26_EXECUTION
 
 #include <beman/execution/execution.hpp>
 
@@ -11,8 +11,6 @@
 namespace beman::execution26::detail {
 using ::beman::execution::detail::make_env;
 using ::beman::execution::detail::sender_adaptor;
-using ::beman::execution::detail::write_env;
-using ::beman::execution::detail::write_env_t;
 } // namespace beman::execution26::detail
 
 namespace beman::execution26 {
@@ -28,7 +26,7 @@ using ::beman::execution::connect_t;
 using ::beman::execution::continues_on;
 using ::beman::execution::continues_on_t;
 using ::beman::execution::default_domain;
-using ::beman::execution::empty_env;
+using ::beman::execution::env;
 using ::beman::execution::env_of_t;
 using ::beman::execution::error_types_of_t;
 using ::beman::execution::forwarding_query;
@@ -114,4 +112,4 @@ using ::beman::execution::with_awaitable_senders;
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION26_EXECUTION

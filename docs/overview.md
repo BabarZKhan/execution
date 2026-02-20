@@ -19,7 +19,7 @@ When an asynchronous operation completes it _signals_ its completion by calling 
 </details>
 <details>
 <summary>environment</summary>
-The term _enviroment_ refers to the bag of properties associated with an <code>_object_</code> by the call <code><a href=‘#get-env’>std::execution::get_env</a>(_object_)</code>. By default the environment for objects is empty (<code><a href=‘#empty-env’>std::execution::empty_env</a></code>). In particular, environments associated with <code><a href=‘#receiver’>receiver</a></code>s are used to provide access  to properties like the <a href=‘#get-stop-token’>stop token</a>, <a href=‘#get-scheduler’>scheduler</a>, or <a href=‘#get-allocator’>allocator</a> associated with the <code><a href=‘#receiver’>receiver</a></code>. The various properties associated with an object are accessed via <a href=‘#queries’>queries</a>.
+The term _enviroment_ refers to the bag of properties associated with an <code>_object_</code> by the call <code><a href=‘#get-env’>std::execution::get_env</a>(_object_)</code>. By default the environment for objects is empty (<code><a href=‘#env’>std::execution::env&lt;&gt;</a></code>). In particular, environments associated with <code><a href=‘#receiver’>receiver</a></code>s are used to provide access  to properties like the <a href=‘#get-stop-token’>stop token</a>, <a href=‘#get-scheduler’>scheduler</a>, or <a href=‘#get-allocator’>allocator</a> associated with the <code><a href=‘#receiver’>receiver</a></code>. The various properties associated with an object are accessed via <a href=‘#queries’>queries</a>.
 </details>
 
 ## Concepts
@@ -70,7 +70,7 @@ Required members for <code>_Receiver_</code>:
 - The type `receiver_concept` is an alias for `receiver_t` or a type derived thereof`.
 - Rvalues of type <code>_Receiver_</code> are movable.
 - Lvalues of type <code>_Receiver_</code> are copyable.
-- <code><a href=‘#get-env’>std::execution::get_env</a>(_receiver_)</code> returns an object. By default this operation returns <code><a href=‘empty-env’>std::execution::empty_env</a></code>.
+- <code><a href=‘#get-env’>std::execution::get_env</a>(_receiver_)</code> returns an object. By default this operation returns <code><a href=‘env’>std::execution::env&lt;&gt;</a></code>.
 
 Typical members for <code>_Receiver_</code>:
 
@@ -177,7 +177,7 @@ Senders represent asynchronous work. They may get composed from multiple senders
 
 Requirements for <code>_Sender_</code>:
 - The type <code>_Sender_::sender_concept</code> is an alias for `sender_t` or a type derived thereof or <code>_Sender_</code> is a suitable _awaitable_.
-- <code><a href='get_env'>std::execution::get_env</a>(_sender_)</code> is valid. By default this operation returns <code><a href=‘empty-env’>std::execution::empty_env</a></code>.
+- <code><a href='get_env'>std::execution::get_env</a>(_sender_)</code> is valid. By default this operation returns <code><a href=‘env’>std::execution::env&lt;&gt;</a></code>.
 - Rvalues of type <code>_Sender_</code> can be moved.
 - Lvalues of type <code>_Sender_</code> can be copied.
 
@@ -224,7 +224,7 @@ static_assert(std::execution::sender<example_sender>);
 </details>
 </details>
 <details>
-<summary><code>sender_in&lt;<i>Sender, Env</i> = std::execution::empty_env&gt;</code></summary>
+<summary><code>sender_in&lt;<i>Sender, Env</i> = std::execution::env&lt;&gt;&gt;</code></summary>
 
 The concept <code>sender_in&lt;<i>Sender, Env</i>&gt;</code> tests whether <code>_Sender_</code> is a <code><a href=‘#sender’>sender</a></code>, <code>_Env_</code> is a destructible type, and <code><a href=‘#get_completion_signatures’>std::execution::get_completion_signatures</a>(_sender_, _env_)</code> yields a specialization of <code><a href=‘#completion_signatures’>std::execution::completion_signatures</a></code>.
 </details>
@@ -236,7 +236,7 @@ The concept <code>sender_to&lt;<i>Sender, Receiver</i>&gt;</code> tests if <code
 To determine if <code>_Receiver_</code> can receive all <a href=‘#completion-signals’>completion signals</a> from <code>_Sender_</code> it checks that for each <code>_Signature_</code> in <code><a href=‘#get_completion_signals’>std::execution::get_completion_signals</a>(_sender_, std::declval&lt;<a href='#env_of_t'>std::execution::env_of_t</a>&lt;_Receiver_&gt;&gt;())</code> the test <code><a href=‘#receiver_of’>std::execution::receiver_of</a>&lt;_Receiver_, _Signature_&gt;</code> yields true. To determine if <code>_Sender_</code> can be <code><a href=‘#connect’>connect</a></code>ed to <code>_Receiver_</code> the concept checks if <code><a href=‘#connect’>connect</a>(std::declval&lt;_Sender_&gt;(), std::declval&lt;_Receiver_&gt;)</code> is a valid expression.
 </details>
 <details>
-<summary><code>sends_stopped&lt;<i>Sender, Env</i> = std::execution::empty_env&gt;</code></summary>
+<summary><code>sends_stopped&lt;<i>Sender, Env</i> = std::execution::env&lt;&gt;&gt;</code></summary>
 
 The concept <code>sends_stopped&lt;<i>Sender, Env</i>&gt;</code> determines if <code>_Sender_</code> may send a <code><a href=‘#set_stopped’>stopped</a></code> <a href=‘#completion-signals’>completion signal</a>. To do so, the concepts determines if <code><a href=‘#get_completion_signals’>std::execution::get_completion_signals</a>(_sender_, _env_)</code> contains the signatures <code><a href=‘#set_stopped’>std::execution::set_stopped_t</a>()</code>.
 </details>
@@ -407,12 +407,12 @@ struct custom_t: forwarding_query_t {
 </details>
 <details>
 <summary><code>get_env(<i>queryable</i>) -> <i>env</i></code></summary>
-**Default**: <a href='#empty_env'>`empty_env`</a>
+**Default**: <a href='#env'>`env&lt;&gt;`</a>
 <br/>
-The expression <code>get_env(<i>queryable</i>)</code> is used to get the environment <code><i>env</i></code> associated with <code><i>queryable</i></code>. To provide a non-default environment for a <code><i>queryable</i></code> a `get_env` member needs to be defined. If <code><i>queryable</i></code> doesn’t provide the <code>get_env</code> query an object of type <code><a href=‘#empty_env’>empty_env</a></code> is returned.
+The expression <code>get_env(<i>queryable</i>)</code> is used to get the environment <code><i>env</i></code> associated with <code><i>queryable</i></code>. To provide a non-default environment for a <code><i>queryable</i></code> a `get_env` member needs to be defined. If <code><i>queryable</i></code> doesn’t provide the <code>get_env</code> query an object of type <code><a href=‘#env’>env&lt;&gt;</a></code> is returned.
 The value of the expression is <ol>
    <li>the result of <code>as_const(<i>queryable</i>).get_env()</code> if this expression is valid and <code>noexcept</code>.</li>
-   <li><code>empty_env</code> otherwise.
+   <li><code>env&lt;&gt;</code> otherwise.
 </ol>
 <div>
 <details>
@@ -441,7 +441,7 @@ Note that the `get_env` member is both `const` and `noexcept`.
 <br/>
 The expression <code>get_allocator(<i>env</i>)</code> returns an <code><i>allocator</i></code> for any memory allocations in the respective context. If <code><i>env</i></code> doesn’t support this query any attempt to access it will result in a compilation error.  The value of the expression <code>get_allocator(<i>env</i>)</code> is the result of <code>as_const(<i>env</i>).query(get_allocator)</code> if
 <ul>
-   <li>the expression is valid</code>;</li>
+   <li>the expression is valid;</li>
    <li>the expression is <code>noexcept</code>;</li>
    <li>the result of the expression satisfies <code><i>simple-allocator</i></code>.</li>
 </ul>
@@ -464,7 +464,7 @@ struct alloc_env {
 </div>
 </details>
 <details>
-<summary><code>get_completion_scheduler&lt;<iTtag</i>&gt;(<i>env</i>) -> <i>scheduler</i></code></summary>
+<summary><code>get_completion_scheduler&lt;<i>Tag</i>&gt;(<i>env</i>) -> <i>scheduler</i></code></summary>
 **Default**: <i>none</i>
 <br/>
 The expression <code>get_complet_scheduler&lt;Tag&gt;(<i>env</i>)</code> yields the completion scheduler for the completion signal <code>Tag</code> associated with <code><i>env</i></code>. This query can be used to determine the scheduler a sender <code><i>sender</i></code> completes on for a given completion signal <code>Tag</code> by using <code>get_completion_scheduler&lt;Tag&gt;(get_env(<i>sender</i>))</code>. The value of the expression is equivalent to <code>as_const(<i>env</i>).query(get_completion_scheduler&lt;Tag&gt;)</code> if
@@ -485,7 +485,7 @@ To determine the result the <code><i>sender</i></code> is first transformed usin
     <li>the type of <code><i>new-sender</i>.get_completion_signatures(<i>env</i>)</code> if this expression is valid;</li>
     <li>the type <code>remove_cvref_t&lt;<i>New-Sender-Type</i>&gt;::completion_signatures</code> if this type exists;</li>
     <li><code>completion_signatures&lt;set_value_t(<i>T</i>), set_error_t(exception_ptr), set_stopped_t()&gt;</code> if <code><i>New-Sender-Type</i></code> is an awaitable type which would yield an object of type <code><i>T</i></code> when it is <code>co_await</code>ed;</li>
-    <li>invalid otherwise.</code>
+    <li>invalid otherwise.</li>
 </ol>
 <div>
 <details>
@@ -516,8 +516,7 @@ The expression <code>get_delegation_scheduler(<i>env</i>)</code> yields the sche
 Otherwise the expression is invalid.
 </details>
 <details>
-<summary><code>get_domain(<i>env</i>) -> <i>domain</i></code>
-</summary>
+<summary><code>get_domain(<i>env</i>) -> <i>domain</i></code></summary>
 The expression <code>get_domain(<i>env</i>)</code> yields the domain associated with <code><i>env</i></code>. The value of the expression is equivalent to <code>as_const(<i>env</i>).query(get_domain)</code> if
 <ol>
    <li>this expression is valid;</li>
@@ -595,7 +594,7 @@ The expression <code>just(<i>value...</i>)</code> creates a sender which sends <
 </ul>
 </details>
 <details>
-<summary><code>just_error(<i>error</i>) -> <i>sender-of</i>&lt;set_error_t(<i>Error</i>)&gt;</code></code></summary>
+<summary><code>just_error(<i>error</i>) -> <i>sender-of</i>&lt;set_error_t(<i>Error</i>)&gt;</code></summary>
 The expression <code>just_error(<i>error</i>)</code> creates a sender which sends <code><i>error</i></code> on the `set_error` (failure) channel when started.
 
 <b>Completions</b>
@@ -604,7 +603,7 @@ The expression <code>just_error(<i>error</i>)</code> creates a sender which send
 </ul>
 </details>
 <details>
-<summary><code>just_stopped() -> <i>sender-of</i>&lt;set_stopped_t()&gt;</code></code></summary>
+<summary><code>just_stopped() -> <i>sender-of</i>&lt;set_stopped_t()&gt;</code></summary>
 The expression <code>just_stopped()</code> creates a sender which sends a completion on the `set_stopped` (cancellation) channel when started.
 
 <b>Completions</b>
@@ -613,7 +612,7 @@ The expression <code>just_stopped()</code> creates a sender which sends a comple
 </ul>
 </details>
 <details>
-<summary><code>read_env(<i>query</i>) -> <i>sender-of</i>&lt;set_value_t(<i>query-result</i>)&gt;</code></code></summary>
+<summary><code>read_env(<i>query</i>) -> <i>sender-of</i>&lt;set_value_t(<i>query-result</i>)&gt;</code></summary>
 The expression <code>read_env(<i>query</i>)</code> creates a sender which sends the result of querying <code><i>query</i></code> the environment of the <code><i>receiver</i></code> it gets connected to on the `set_value` channel when started. Put differently, it calls <code>set_value(move(<i>receiver</i>), <i>query</i>(get_env(<i>receiver</i>)))</code>. For example, in a coroutine it may be useful to extra the stop token associated with the coroutine which can be done using <code>read_env</code>:
 
 ```c++\
@@ -626,7 +625,7 @@ auto token = co_await read_env(get_stop_token);
 </ul>
 </details>
 <details>
-<summary><code>schedule(<i>scheduler</i>) -> <i>sender-of</i>&lt;set_value_t()&gt;</code></code></summary>
+<summary><code>schedule(<i>scheduler</i>) -> <i>sender-of</i>&lt;set_value_t()&gt;</code></summary>
 The expression <code>schedule(<i>scheduler</i>)</code> creates a sender which upon success completes on the <code>set_value</code> channel without any arguments running on the execution context associated with <code><i>scheduler</i></code>. Depending on the scheduler it is possible that the sender can complete with an error if the scheduling fails or using `set_stopped()` if the operation gets cancelled before it is successful.
 
 <b>Completions</b>
@@ -640,6 +639,13 @@ The expression <code>schedule(<i>scheduler</i>)</code> creates a sender which up
 ### Sender Adaptors
 The sender adaptors take one or more senders and adapt their respective behavior to complete with a corresponding result. The description uses the informal function <code><i>completions-of</i>(<i>sender</i>)</code> to represent the completion signatures which <code><i>sender</i></code> produces. Also, completion signatures are combined using <code>+</code>: the result is the deduplicated set of the combined completion signatures.
 
+<details>
+<summary><code>affine_on(<i>sender</i>) -> <i>sender-of</i><<i>completions-of</i>(<i>sender</i>)></code></summary>
+The expression <code>affine_on(<i>sender</i>)</code> creates
+a sender which completes on the same scheduler it was started on, even if <code><i>sender</i></code> changes the scheduler. The scheduler to resume on is determined using <code>get_scheduler(get_env(<i>rcvr</i>))</code> where <code><i>rcvr</i></code> is the receiver the sender is <code>connect</code>ed to.
+
+The primary use of <code>affine_on</code> is implementing scheduler affinity for <code>task</code>.
+</details>
 <details>
 <summary>`bulk`</summary>
 </details>
@@ -667,7 +673,7 @@ The expression <code>into_variant(<i>sender</i>)</code> creates a sender which t
 <summary><code>let_value(<i>upstream</i>, <i>fun</i>) -> <i>sender</i></code></summary>
 </details>
 <details>
-<summary>`on`</summary>
+<summary><code>on(_sched_, _sndr_)</code></summary>
 </details>
 <details>
 <summary><code>schedule_from(<i>scheduler</i>, <i>sender</i>) -> <i>sender</i></code></summary>
@@ -699,6 +705,10 @@ The expression <code>into_variant(<i>sender</i>)</code> creates a sender which t
 <details>
 <summary><code>when_all_with_variant(<i>sender</i>...) -> <i>sender</i></code></summary>
 </details>
+<details>
+<summary><code>write_env(<i>sender</i>, <i>env</i>) -> <i>sender</i></code></summary>
+</details>
+
 
 ### Sender Consumers
 
@@ -713,7 +723,7 @@ The expression <code>into_variant(<i>sender</i>)</code> creates a sender which t
 - `completion_signatures_t`
 - `connect_result_t`
 - `default_domain`
-- `empty_env`
+- `env&lt;T...&gt;`
 - `env_of_t`
 - `error_types_of_t`
 - `fwd_env`

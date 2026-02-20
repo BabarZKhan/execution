@@ -4,18 +4,31 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR
 
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
+#include <type_traits>
+#include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.forward_like;
+import beman.execution.detail.product_type;
+import beman.execution.detail.sender;
+import beman.execution.detail.sender_adaptor_closure;
+import beman.execution.detail.sender_decompose;
+#else
+#include <beman/execution/detail/forward_like.hpp>
+#include <beman/execution/detail/product_type.hpp>
 #include <beman/execution/detail/sender.hpp>
 #include <beman/execution/detail/sender_adaptor_closure.hpp>
 #include <beman/execution/detail/sender_decompose.hpp>
-#include <beman/execution/detail/product_type.hpp>
-#include <beman/execution/detail/forward_like.hpp>
-#include <type_traits>
-#include <utility>
+#endif
 
 // ----------------------------------------------------------------------------
 
 namespace beman::execution::detail {
-template <typename Adaptor, typename... T>
+template <typename Adaptor, typename... T> //-dk:TODO detail export
 struct sender_adaptor : ::beman::execution::detail::product_type<::std::decay_t<Adaptor>, ::std::decay_t<T>...>,
                         ::beman::execution::sender_adaptor_closure<sender_adaptor<Adaptor, T...>> {
     template <::beman::execution::sender Sender, typename Self>
@@ -41,4 +54,4 @@ sender_adaptor(T&&...) -> sender_adaptor<T...>;
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR

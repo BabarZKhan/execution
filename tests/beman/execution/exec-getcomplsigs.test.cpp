@@ -1,11 +1,13 @@
 // src/beman/execution/tests/exec-getcomplsigs.test.cpp             -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <beman/execution/detail/get_completion_signatures.hpp>
-#include <beman/execution/detail/transform_sender.hpp>
-#include <beman/execution/execution.hpp>
-#include <test/execution.hpp>
 #include <concepts>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
+#include <beman/execution/execution.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 

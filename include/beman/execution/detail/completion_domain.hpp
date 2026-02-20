@@ -4,12 +4,28 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_COMPLETION_DOMAIN
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_COMPLETION_DOMAIN
 
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
+#include <concepts>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.default_domain;
+import beman.execution.detail.get_completion_scheduler;
+import beman.execution.detail.get_domain;
+import beman.execution.detail.get_env;
+import beman.execution.detail.sender;
+import beman.execution.detail.set_error;
+import beman.execution.detail.set_stopped;
+import beman.execution.detail.set_value;
+#else
 #include <beman/execution/detail/default_domain.hpp>
-#include <beman/execution/detail/get_domain.hpp>
 #include <beman/execution/detail/get_completion_scheduler.hpp>
+#include <beman/execution/detail/get_domain.hpp>
 #include <beman/execution/detail/get_env.hpp>
 #include <beman/execution/detail/sender.hpp>
-#include <concepts>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -59,10 +75,10 @@ constexpr auto completion_domain(const Sender& sender) noexcept {
         typename completion_domain_merge<decltype(get(::beman::execution::set_error, sender)),
                                          decltype(get(::beman::execution::set_stopped, sender))>::type,
         decltype(get(::beman::execution::set_value, sender))>::type;
-    return ::std::conditional_t< ::std::same_as<type, completion_domain_undefined>, Default, type>();
+    return ::std::conditional_t<::std::same_as<type, completion_domain_undefined>, Default, type>();
 }
 } // namespace beman::execution::detail
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_COMPLETION_DOMAIN

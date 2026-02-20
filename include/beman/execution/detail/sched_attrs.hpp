@@ -4,14 +4,27 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SCHED_ATTRS
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SCHED_ATTRS
 
-#include <beman/execution/detail/get_domain.hpp>
-#include <beman/execution/detail/get_completion_scheduler.hpp>
-#include <beman/execution/detail/set_error.hpp>
-#include <beman/execution/detail/set_stopped.hpp>
-#include <beman/execution/detail/set_value.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
 #include <type_traits>
 #include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.get_completion_scheduler;
+import beman.execution.detail.get_domain;
+import beman.execution.detail.set_error;
+import beman.execution.detail.set_stopped;
+import beman.execution.detail.set_value;
+#else
+#include <beman/execution/detail/get_completion_scheduler.hpp>
+#include <beman/execution/detail/get_domain.hpp>
+#include <beman/execution/detail/set_error.hpp>
+#include <beman/execution/detail/set_stopped.hpp>
+#include <beman/execution/detail/set_value.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -45,4 +58,4 @@ sched_attrs(Scheduler&&) -> sched_attrs<::std::remove_cvref_t<Scheduler>>;
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SCHED_ATTRS

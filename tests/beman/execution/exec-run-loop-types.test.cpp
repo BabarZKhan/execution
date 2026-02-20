@@ -1,8 +1,13 @@
 // src/beman/execution/tests/exec-run-loop-types.test.cpp           -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <exception>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/run_loop.hpp>
-
 #include <beman/execution/detail/inplace_stop_source.hpp>
 #include <beman/execution/detail/completion_signatures.hpp>
 #include <beman/execution/detail/connect.hpp>
@@ -13,10 +18,7 @@
 #include <beman/execution/detail/receiver_of.hpp>
 #include <beman/execution/detail/scheduler.hpp>
 #include <beman/execution/detail/sender.hpp>
-
-#include <test/execution.hpp>
-#include <concepts>
-#include <exception>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -80,11 +82,16 @@ TEST(exec_run_loop_types) {
     // p5:
     auto sender{test_std::schedule(scheduler)};
     struct env {};
-    static_assert(::std::same_as<test_std::completion_signatures<test_std::set_value_t(),
-                                                                 test_std::set_error_t(std::exception_ptr),
-                                                                 test_std::set_stopped_t()>,
+    test_std::inplace_stop_source source{};
+    struct token_env {
+        test_std::inplace_stop_token token;
+        auto                         query(const test_std::get_stop_token_t&) const noexcept { return this->token; }
+    };
+    static_assert(::std::same_as<test_std::completion_signatures<test_std::set_value_t()>,
                                  decltype(test_std::get_completion_signatures(sender, env{}))>);
-
+    static_assert(
+        ::std::same_as<test_std::completion_signatures<test_std::set_value_t(), test_std::set_stopped_t()>,
+                       decltype(test_std::get_completion_signatures(sender, token_env{source.get_token()}))>);
     // p7:
     static_assert(test_std::receiver_of<receiver, decltype(test_std::get_completion_signatures(sender, env{}))>);
     // p7.1:

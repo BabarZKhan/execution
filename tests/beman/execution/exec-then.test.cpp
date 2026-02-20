@@ -1,8 +1,16 @@
 // src/beman/execution/tests/exec-then.test.cpp                     -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <memory_resource>
+#include <optional>
+#include <tuple>
+#include <utility>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/then.hpp>
-
 #include <beman/execution/detail/completion_signatures_of_t.hpp>
 #include <beman/execution/detail/connect.hpp>
 #include <beman/execution/detail/forwarding_query.hpp>
@@ -12,9 +20,7 @@
 #include <beman/execution/detail/sender_in.hpp>
 #include <beman/execution/detail/start.hpp>
 #include <beman/execution/detail/sync_wait.hpp>
-#include <concepts>
-#include <memory_resource>
-#include <test/execution.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -80,7 +86,7 @@ auto test_has(auto cpo, auto in_sender, auto fun) -> void {
 template <typename... Completions>
 auto test_then_type(auto sender) {
     static_assert(std::same_as<test_std::completion_signatures<Completions...>,
-                               test_std::completion_signatures_of_t<decltype(sender), test_std::empty_env>>);
+                               test_std::completion_signatures_of_t<decltype(sender), test_std::env<>>>);
 }
 
 auto test_then_type() -> void {

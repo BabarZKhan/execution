@@ -1,19 +1,23 @@
 // src/beman/execution/tests/exec-let.test.cpp                      -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <beman/execution/detail/let.hpp>
-#include <beman/execution/detail/just.hpp>
-#include <beman/execution/detail/get_scheduler.hpp>
-#include <beman/execution/detail/then.hpp>
-#include <beman/execution/detail/read_env.hpp>
-#include <beman/execution/detail/sync_wait.hpp>
-#include <test/execution.hpp>
 #include <array>
 #include <cstdlib>
 #include <concepts>
 #include <memory_resource>
 #include <span>
 #include <vector>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
+#include <beman/execution/detail/let.hpp>
+#include <beman/execution/detail/just.hpp>
+#include <beman/execution/detail/get_scheduler.hpp>
+#include <beman/execution/detail/then.hpp>
+#include <beman/execution/detail/read_env.hpp>
+#include <beman/execution/detail/sync_wait.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -55,7 +59,7 @@ auto test_let_value() {
                                    test_std::set_error_t(char)>();
             })};
     static_assert(test_std::sender<decltype(s2)>);
-    using type = decltype(test_std::get_completion_signatures(s2, test_std::empty_env{}));
+    using type = decltype(test_std::get_completion_signatures(s2, test_std::env<>{}));
     static_assert(std::same_as<type, type>);
     // static_assert(std::same_as<void, type>);
 
@@ -104,7 +108,7 @@ auto test_let_value_allocator() -> void {
     auto             s{ex::just(std::span(values)) | ex::let_value(fun()) | ex::then([](auto&&) noexcept {})};
     static_assert(test_std::sender<decltype(s)>);
     static_assert(test_std::sender_in<decltype(s)>);
-    // static_assert(std::same_as<void, decltype(test_std::get_completion_signatures(s, test_std::empty_env{}))>);
+    // static_assert(std::same_as<void, decltype(test_std::get_completion_signatures(s, test_std::env<>{}))>);
     ex::sync_wait(s);
 }
 

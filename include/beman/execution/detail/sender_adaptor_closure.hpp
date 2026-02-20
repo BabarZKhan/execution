@@ -4,10 +4,19 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR_CLOSURE
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR_CLOSURE
 
-#include <beman/execution/detail/sender.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
 #include <type_traits>
 #include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.sender;
+#else
+#include <beman/execution/detail/sender.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -44,4 +53,4 @@ auto operator|(Sender&& sender, Adaptor&& adaptor) {
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SENDER_ADAPTOR_CLOSURE

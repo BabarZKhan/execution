@@ -1,18 +1,22 @@
 // src/beman/execution/tests/exec-into-variant.test.cpp             -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <exception>
+#include <tuple>
+#include <type_traits>
+#include <variant>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/into_variant.hpp>
-
 #include <beman/execution/detail/connect.hpp>
 #include <beman/execution/detail/just.hpp>
 #include <beman/execution/detail/receiver.hpp>
 #include <beman/execution/detail/operation_state.hpp>
 #include <beman/execution/detail/sender.hpp>
-#include <test/execution.hpp>
-
-#include <concepts>
-#include <exception>
-#include <type_traits>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -56,15 +60,15 @@ auto test_into_variant(auto&& sender) -> void {
         static_assert(requires {
             typename std::decay_t<decltype(sender)>;
             typename std::decay_t<decltype(sender)>::completion_signatures;
-            test_std::get_completion_signatures(sender, test_std::empty_env{});
-            typename test_std::value_types_of_t<std::decay_t<decltype(sender)>, test_std::empty_env>;
+            test_std::get_completion_signatures(sender, test_std::env<>{});
+            typename test_std::value_types_of_t<std::decay_t<decltype(sender)>, test_std::env<>>;
             test_std::into_variant(sender);
             test_std::connect(test_std::into_variant(sender), receiver{});
             { test_std::connect(test_std::into_variant(sender), receiver{}) } -> test_std::operation_state;
         });
         static_assert(std::same_as<Signatures,
                                    decltype(test_std::get_completion_signatures(test_std::into_variant(sender),
-                                                                                test_std::empty_env{}))>);
+                                                                                test_std::env<>{}))>);
         bool called{false};
         auto op{test_std::connect(test_std::into_variant(sender), receiver{&called})};
         ASSERT(not called);

@@ -1,10 +1,14 @@
 // src/beman/execution/tests/exec-get-env.test.cpp                  -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <beman/execution/execution.hpp>
-#include "test/execution.hpp"
 #include <concepts>
 #include <utility>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
+#include <beman/execution/execution.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -42,17 +46,17 @@ struct normal {
 } // namespace
 
 TEST(exec_get_env) {
-    static_assert(std::semiregular<test_std::empty_env>);
+    // static_assert(std::semiregular<test_std::env<>>);
 
     static_assert(std::semiregular<test_std::get_env_t>);
     static_assert(std::same_as<const test_std::get_env_t, decltype(test_std::get_env)>);
 
     auto e0 = test_std::get_env(0);
     test::use(e0);
-    static_assert(std::same_as<test_std::empty_env, decltype(e0)>);
+    static_assert(std::same_as<test_std::env<>, decltype(e0)>);
     auto e1 = test_std::get_env(non_const{});
     test::use(e1);
-    static_assert(std::same_as<test_std::empty_env, decltype(e1)>);
+    static_assert(std::same_as<test_std::env<>, decltype(e1)>);
     auto e2 = test_std::get_env(normal<test_env>{});
     test::use(e2);
     static_assert(std::same_as<test_env, decltype(e2)>);

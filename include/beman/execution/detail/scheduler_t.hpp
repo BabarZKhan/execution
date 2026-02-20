@@ -4,6 +4,8 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SCHEDULER_T
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_SCHEDULER_T
 
+#include <beman/execution/detail/common.hpp>
+
 // ----------------------------------------------------------------------------
 
 namespace beman::execution {
@@ -16,4 +18,4 @@ struct scheduler_t {};
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SCHEDULER_T

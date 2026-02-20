@@ -1,14 +1,28 @@
 // include/beman/execution/detail/scope_token.hpp                     -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#ifndef INCLUDED_INCLUDE_BEMAN_EXECUTION_DETAIL_SCOPE_TOKEN
-#define INCLUDED_INCLUDE_BEMAN_EXECUTION_DETAIL_SCOPE_TOKEN
+#ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_SCOPE_TOKEN
+#define INCLUDED_BEMAN_EXECUTION_DETAIL_SCOPE_TOKEN
 
-#include <beman/execution/detail/sender.hpp>
-#include <beman/execution/detail/sender_in.hpp>
-#include <beman/execution/detail/get_completion_signatures.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
 #include <type_traits>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.completion_signatures;
+import beman.execution.detail.get_completion_signatures;
+import beman.execution.detail.scope_association;
+import beman.execution.detail.sender;
+import beman.execution.detail.sender_in;
+#else
+#include <beman/execution/detail/get_completion_signatures.hpp>
+#include <beman/execution/detail/scope_association.hpp>
+#include <beman/execution/detail/sender.hpp>
+#include <beman/execution/detail/sender_in.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -29,9 +43,8 @@ static_assert(::beman::execution::sender_in<::beman::execution::detail::token_te
 
 namespace beman::execution {
 template <typename Token>
-concept scope_token = ::std::copyable<Token> && requires(Token token) {
-    { token.try_associate() } -> ::std::same_as<bool>;
-    { token.disassociate() } noexcept;
+concept scope_token = ::std::copyable<Token> && requires(const Token token) {
+    { token.try_associate() } -> ::beman::execution::scope_association;
     {
         token.wrap(::std::declval<::beman::execution::detail::token_test_sender>())
     } -> ::beman::execution::sender_in<::beman::execution::detail::token_test_env>;
@@ -40,4 +53,4 @@ concept scope_token = ::std::copyable<Token> && requires(Token token) {
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_SCOPE_TOKEN

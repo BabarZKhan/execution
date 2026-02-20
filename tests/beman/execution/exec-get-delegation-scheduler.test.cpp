@@ -1,15 +1,17 @@
 // src/beman/execution/tests/exec-get-delegation-scheduler.test.cpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/get_delegation_scheduler.hpp>
-
-#include <beman/execution/detail/empty_env.hpp>
+#include <beman/execution/detail/env.hpp>
 #include <beman/execution/detail/get_completion_scheduler.hpp>
 #include <beman/execution/detail/scheduler.hpp>
 #include <beman/execution/detail/sender.hpp>
-
-#include <test/execution.hpp>
-#include <concepts>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -64,7 +66,7 @@ TEST(exec_get_delegation_scheduler) {
         std::same_as<const test_std::get_delegation_scheduler_t, decltype(test_std::get_delegation_scheduler)>);
     static_assert(test_std::forwarding_query((test_std::get_delegation_scheduler)));
 
-    test_get_delegation_scheduler<false>(test_std::empty_env{});
+    test_get_delegation_scheduler<false>(test_std::env<>{});
     test_get_delegation_scheduler<false>(env<false, scheduler>{});
     test_get_delegation_scheduler<false>(env<true, scheduler::sender>{});
     test_get_delegation_scheduler<true>(env<true, scheduler>{17});

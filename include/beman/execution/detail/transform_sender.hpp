@@ -4,9 +4,20 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_TRANSFORM_SENDER
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_TRANSFORM_SENDER
 
-#include <beman/execution/detail/sender.hpp>
-#include <beman/execution/detail/default_domain.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
+#include <utility>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.default_domain;
+import beman.execution.detail.sender;
+#else
+#include <beman/execution/detail/default_domain.hpp>
+#include <beman/execution/detail/sender.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -124,4 +135,4 @@ constexpr auto transform_sender(Domain dom, Sender&& sender, const Env&... env) 
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_TRANSFORM_SENDER

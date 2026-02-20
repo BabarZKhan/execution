@@ -3,16 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # gersemi: on
 
-if(NOT TARGET ${TARGET_NAME})
-    add_library(${TARGET_NAME} STATIC)
-endif()
-add_library(${TARGET_ALIAS} ALIAS ${TARGET_NAME})
+add_library(${TARGET_NAME} INTERFACE)
+add_library(beman::execution_headers ALIAS ${TARGET_NAME})
 
 target_sources(
     ${TARGET_NAME}
-    PRIVATE execution.cpp
     PUBLIC
-        FILE_SET ${TARGET_NAME}_public_headers
+        FILE_SET public_headers
             TYPE HEADERS
             BASE_DIRS ${PROJECT_SOURCE_DIR}/include
             FILES
@@ -22,10 +19,11 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution26/execution.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution26/stop_token.hpp
     PUBLIC
-        FILE_SET ${TARGET_NAME}_detail_headers
+        FILE_SET detail_headers
             TYPE HEADERS
             BASE_DIRS ${PROJECT_SOURCE_DIR}/include
             FILES
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/affine_on.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/allocator_aware_move.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/almost_scheduler.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/apply_sender.hpp
@@ -71,7 +69,7 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/default_domain.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/default_impls.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/emplace_from.hpp
-                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/empty_env.hpp
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/env.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/env_of_t.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/env_promise.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/env_type.hpp
@@ -118,7 +116,9 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/meta_transform.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/meta_unique.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/movable_value.hpp
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/nested_sender_has_affine_on.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/never_stop_token.hpp
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/non_assignable.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/nostopstate.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/nothrow_callable.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/notify.hpp
@@ -141,6 +141,7 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/schedule_result_t.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/scheduler.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/scheduler_t.hpp
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/scope_association.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/scope_token.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_adaptor.hpp
@@ -148,6 +149,7 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_awaitable.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_decompose.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_for.hpp
+                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_has_affine_on.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sender_in.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/sends_stopped.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/set_error.hpp
@@ -160,7 +162,6 @@ target_sources(
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/spawn.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/spawn_future.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/spawn_get_allocator.hpp
-                ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/split.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/start.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/starts_on.hpp
                 ${PROJECT_SOURCE_DIR}/include/beman/execution/detail/state_type.hpp
@@ -194,44 +195,192 @@ target_sources(
 
 if(BEMAN_USE_MODULES)
     target_sources(
-        ${TARGET_NAME}
+        ${TARGET_PREFIX}
+        PRIVATE
+            execution.cpp # TODO(CK): check if really needed!
         PUBLIC
             FILE_SET CXX_MODULES
-                BASE_DIRS ${PROJECT_SOURCE_DIR}/src/beman/execution
-                FILES ${PROJECT_SOURCE_DIR}/src/beman/execution/execution.cppm
+                FILES
+                    execution.cppm
+                    execution-detail.cppm
+                    affine_on.cppm
+                    allocator_aware_move.cppm
+                    almost_scheduler.cppm
+                    apply_sender.cppm
+                    as_awaitable.cppm
+                    as_except_ptr.cppm
+                    as_tuple.cppm
+                    associate.cppm
+                    atomic_intrusive_stack.cppm
+                    await_result_type.cppm
+                    await_suspend_result.cppm
+                    awaitable_sender.cppm
+                    basic_operation.cppm
+                    basic_receiver.cppm
+                    basic_sender.cppm
+                    basic_state.cppm
+                    bulk.cppm
+                    call_result_t.cppm
+                    callable.cppm
+                    check_type_alias_exist.cppm
+                    child_type.cppm
+                    class_type.cppm
+                    completion_domain.cppm
+                    completion_signature.cppm
+                    completion_signatures_for.cppm
+                    completion_signatures_of_t.cppm
+                    completion_signatures.cppm
+                    completion_tag.cppm
+                    connect_all_result.cppm
+                    connect_all.cppm
+                    connect_awaitable.cppm
+                    connect_result_t.cppm
+                    connect.cppm
+                    continues_on.cppm
+                    counting_scope_base.cppm
+                    counting_scope_join.cppm
+                    counting_scope.cppm
+                    decayed_same_as.cppm
+                    decayed_tuple.cppm
+                    decayed_type_list.cppm
+                    decayed_typeof.cppm
+                    decays_to.cppm
+                    default_domain.cppm
+                    default_impls.cppm
+                    emplace_from.cppm
+                    enable_sender.cppm
+                    env_of_t.cppm
+                    env_promise.cppm
+                    env_type.cppm
+                    env.cppm
+                    error_types_of_t.cppm
+                    forward_like.cppm
+                    forwarding_query.cppm
+                    fwd_env.cppm
+                    gather_signatures.cppm
+                    get_allocator.cppm
+                    get_awaiter.cppm
+                    get_completion_scheduler.cppm
+                    get_completion_signatures.cppm
+                    get_delegation_scheduler.cppm
+                    get_domain_early.cppm
+                    get_domain_late.cppm
+                    get_domain.cppm
+                    get_env.cppm
+                    get_scheduler.cppm
+                    get_stop_token.cppm
+                    has_as_awaitable.cppm
+                    has_completions.cppm
+                    immovable.cppm
+                    impls_for.cppm
+                    indices_for.cppm
+                    indirect_meta_apply.cppm
+                    inplace_stop_source.cppm
+                    into_variant.cppm
+                    intrusive_stack.cppm
+                    is_awaitable.cppm
+                    is_awaiter.cppm
+                    is_sender.cppm
+                    join_env.cppm
+                    just.cppm
+                    let.cppm
+                    make_env.cppm
+                    make_sender.cppm
+                    matching_sig.cppm
+                    meta_combine.cppm
+                    meta_contains.cppm
+                    meta_contain_same.cppm
+                    meta_filter.cppm
+                    meta_prepend.cppm
+                    meta_size.cppm
+                    meta_to.cppm
+                    meta_transform.cppm
+                    meta_unique.cppm
+                    movable_value.cppm
+                    nested_sender_has_affine_on.cppm
+                    never_stop_token.cppm
+                    notify.cppm
+                    non_assignable.cppm
+                    nostopstate.cppm
+                    nothrow_callable.cppm
+                    on_stop_request.cppm
+                    on.cppm
+                    operation_state_task.cppm
+                    operation_state.cppm
+                    product_type.cppm
+                    prop.cppm
+                    query_with_default.cppm
+                    queryable.cppm
+                    read_env.cppm
+                    receiver_of.cppm
+                    receiver.cppm
+                    run_loop.cppm
+                    sched_attrs.cppm
+                    sched_env.cppm
+                    schedule_from.cppm
+                    schedule_result_t.cppm
+                    schedule.cppm
+                    scheduler_t.cppm
+                    scheduler.cppm
+                    scope_association.cppm
+                    scope_token.cppm
+                    sender_adaptor_closure.cppm
+                    sender_adaptor.cppm
+                    sender_awaitable.cppm
+                    sender_decompose.cppm
+                    sender_for.cppm
+                    sender_has_affine_on.cppm
+                    sender_in.cppm
+                    sender.cppm
+                    sends_stopped.cppm
+                    set_error.cppm
+                    set_stopped.cppm
+                    set_value.cppm
+                    simple_allocator.cppm
+                    simple_counting_scope.cppm
+                    single_sender_value_type.cppm
+                    single_sender.cppm
+                    spawn_future.cppm
+                    spawn_get_allocator.cppm
+                    spawn.cppm
+                    start.cppm
+                    starts_on.cppm
+                    state_type.cppm
+                    stoppable_callback_for.cppm
+                    stop_callback_for_t.cppm
+                    stop_source.cppm
+                    stop_token_of_t.cppm
+                    stop_when.cppm
+                    stoppable_source.cppm
+                    stoppable_token.cppm
+                    suspend_complete.cppm
+                    sync_wait.cppm
+                    tag_of_t.cppm
+                    then.cppm
+                    transform_sender.cppm
+                    type_list.cppm
+                    unspecified_promise.cppm
+                    unstoppable_token.cppm
+                    valid_completion_for.cppm
+                    valid_completion_signatures.cppm
+                    valid_specialization.cppm
+                    value_types_of_t.cppm
+                    variant_or_empty.cppm
+                    when_all_with_variant.cppm
+                    when_all.cppm
+                    with_await_transform.cppm
+                    with_awaitable_senders.cppm
+                    write_env.cppm
     )
+    target_compile_definitions(${TARGET_PREFIX} PUBLIC BEMAN_HAS_MODULES)
+    target_link_libraries(${TARGET_PREFIX} PUBLIC ${TARGET_NAME})
 endif()
 
 get_property(
     DETAIL_HEADER_FILES
     TARGET ${TARGET_NAME}
-    PROPERTY HEADER_SET_${TARGET_NAME}_detail_headers
+    PROPERTY HEADER_SET_detail_headers
 )
 source_group("Header Files\\detail" FILES ${DETAIL_HEADER_FILES})
 
 set_target_properties(${TARGET_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
-
-if(NOT BEMAN_EXECUTION_ENABLE_INSTALL OR CMAKE_SKIP_INSTALL_RULES)
-    return()
-endif()
-
-install(
-    TARGETS ${TARGET_NAME}
-    EXPORT ${TARGETS_EXPORT_NAME}1
-    ARCHIVE DESTINATION lib/$<CONFIG>
-    FILE_SET ${TARGET_NAME}_public_headers
-    FILE_SET ${TARGET_NAME}_detail_headers
-    FILE_SET CXX_MODULES DESTINATION ${INSTALL_CONFIGDIR}/module
-    # There's currently no convention for this location
-    CXX_MODULES_BMI
-        DESTINATION ${INSTALL_CONFIGDIR}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
-)
-
-install(
-    EXPORT ${TARGETS_EXPORT_NAME}1
-    FILE ${TARGETS_EXPORT_NAME}.cmake
-    DESTINATION "${INSTALL_CONFIGDIR}"
-    NAMESPACE ${TARGET_NAMESPACE}::
-    CXX_MODULES_DIRECTORY
-    .
-)

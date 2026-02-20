@@ -1,16 +1,21 @@
 // src/beman/execution/tests/exec-when-all.test.cpp                 -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <optional>
+#include <utility>
+#include <tuple>
+#include <variant>
+#include <test/execution.hpp>
+// #include <beman/execution/detail/suppress_push.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/when_all.hpp>
 #include <beman/execution/detail/stop_callback_for_t.hpp>
 #include <beman/execution/detail/when_all_with_variant.hpp>
 #include <beman/execution/execution.hpp>
-#include <test/execution.hpp>
-#include <concepts>
-#include <optional>
-#include <utility>
-
-#include <beman/execution/detail/suppress_push.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -43,7 +48,7 @@ auto test_when_all_breathing() -> void {
     auto s{test_std::when_all(test_std::just(), test_std::just(3, true), test_std::just(1.5))};
     static_assert(test_std::sender<decltype(s)>);
     test::check_type<test_std::completion_signatures<test_std::set_value_t(int, bool, double)>>(
-        test_std::get_completion_signatures(s, test_std::empty_env{}));
+        test_std::get_completion_signatures(s, test_std::env<>{}));
     auto res{test_std::sync_wait(s)};
     ASSERT(res.has_value());
     ASSERT((*res == std::tuple{3, true, 1.5}));
@@ -67,7 +72,7 @@ struct await_cancel {
         using stop_callback = test_std::stop_callback_for_t<token, callback>;
 
         Receiver                     receiver;
-        std::optional<stop_callback> cb;
+        std::optional<stop_callback> cb{};
         auto                         start() & noexcept {
             cb.emplace(test_std::get_stop_token(test_std::get_env(this->receiver)), &this->receiver);
         }

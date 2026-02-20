@@ -1,8 +1,16 @@
-#include <beman/execution/execution.hpp>
+// examples/stackoverflow.cpp                                         -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 #include <coroutine>
 #include <iostream>
+#include <memory>
 #include <type_traits>
 #include <utility>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
+#include <beman/execution/execution.hpp>
+#endif
 
 namespace ex = beman::execution;
 
@@ -19,7 +27,7 @@ struct task {
         struct final_awaiter {
             base* data;
             bool  await_ready() noexcept { return false; }
-            auto  await_suspend(auto h) noexcept { this->data->complete_value(); };
+            auto  await_suspend(auto) noexcept { this->data->complete_value(); };
             void  await_resume() noexcept {}
         };
         std::suspend_always     initial_suspend() const noexcept { return {}; }
@@ -71,6 +79,7 @@ struct task {
 
 int main(int ac, char*[]) {
     std::cout << std::unitbuf;
+#ifndef _MSC_VER
     using on_exit = std::unique_ptr<const char, decltype([](auto msg) { std::cout << msg << "\n"; })>;
     static_assert(ex::sender<task>);
     ex::sync_wait([](int n) -> task {
@@ -89,4 +98,5 @@ int main(int ac, char*[]) {
             }
         co_await ex::just_stopped();
     }(ac < 2 ? 3 : 30000));
+#endif
 }

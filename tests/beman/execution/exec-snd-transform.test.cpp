@@ -1,13 +1,17 @@
 // src/beman/execution/tests/exec-snd-transform.test.cpp            -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include <concepts>
+#include <type_traits>
+#include <test/execution.hpp>
+#ifdef BEMAN_HAS_MODULES
+import beman.execution;
+#else
 #include <beman/execution/detail/transform_sender.hpp>
 #include <beman/execution/detail/sender.hpp>
 #include <beman/execution/execution.hpp>
 #include <beman/execution/detail/tag_of_t.hpp>
-#include <test/execution.hpp>
-#include <concepts>
-#include <type_traits>
+#endif
 
 // ----------------------------------------------------------------------------
 

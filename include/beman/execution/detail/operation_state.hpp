@@ -4,9 +4,18 @@
 #ifndef INCLUDED_BEMAN_EXECUTION_DETAIL_OPERATION_STATE
 #define INCLUDED_BEMAN_EXECUTION_DETAIL_OPERATION_STATE
 
-#include <beman/execution/detail/start.hpp>
+#include <beman/execution/detail/common.hpp>
+#ifdef BEMAN_HAS_IMPORT_STD
+import std;
+#else
 #include <concepts>
 #include <type_traits>
+#endif
+#ifdef BEMAN_HAS_MODULES
+import beman.execution.detail.start;
+#else
+#include <beman/execution/detail/start.hpp>
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -23,4 +32,4 @@ concept operation_state =
 
 // ----------------------------------------------------------------------------
 
-#endif
+#endif // INCLUDED_BEMAN_EXECUTION_DETAIL_OPERATION_STATE
